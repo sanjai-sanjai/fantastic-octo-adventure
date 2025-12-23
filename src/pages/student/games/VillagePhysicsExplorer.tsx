@@ -308,7 +308,7 @@ export default function VillagePhysicsExplorer() {
           <div className="space-y-6">
             {/* Surface Selection */}
             <div className="space-y-3">
-              <label className="text-sm font-semibold text-gray-700">
+              <label className="text-sm font-semibold text-foreground">
                 Choose a Surface
               </label>
               <div className="grid grid-cols-3 gap-3">
