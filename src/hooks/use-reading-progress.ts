@@ -59,9 +59,9 @@ export function useReadingProgress(subject: string) {
           throw queryError;
         }
 
-        const existing = existingList && existingList.length > 0 ? existingList[0] : null;
+        const existingRecord = existingList && existingList.length > 0 ? existingList[0] : null;
 
-        if (existing?.id) {
+        if (existingRecord?.id) {
           const { error } = await supabase
             .from("reading_progress")
             .update({
@@ -70,7 +70,7 @@ export function useReadingProgress(subject: string) {
               completed_at: isCompleted ? new Date().toISOString() : null,
               last_read_at: new Date().toISOString(),
             })
-            .eq("id", existing.id);
+            .eq("id", existingRecord.id);
 
           if (error) throw error;
         } else {
