@@ -48,18 +48,18 @@ export function useReadingProgress(subject: string) {
       if (!user?.id) throw new Error("Not authenticated");
 
       try {
-        const { data: existing, error: queryError } = await supabase
+        const { data: existingList, error: queryError } = await supabase
           .from("reading_progress")
           .select("id")
           .eq("user_id", user.id)
           .eq("subject", subject)
-          .eq("chapter_id", chapterId)
-          .single();
+          .eq("chapter_id", chapterId);
 
-        if (queryError && queryError.code !== "PGRST116") {
-          // PGRST116 is "no rows" which is expected
+        if (queryError) {
           throw queryError;
         }
+
+        const existing = existingList && existingList.length > 0 ? existingList[0] : null;
 
         if (existing?.id) {
           const { error } = await supabase
