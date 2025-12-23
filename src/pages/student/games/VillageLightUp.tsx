@@ -9,31 +9,30 @@ import { cn } from "@/lib/utils";
 
 interface WireTile {
   id: number;
-  x: number;
-  y: number;
-  rotation: number; // 0, 90, 180, 270
-  type: "straight" | "corner"; // straight = connects left-right, corner = connects top-right
-  connected: boolean;
+  row: number;
+  col: number;
+  rotation: number;
+  type: "straight" | "corner";
 }
 
 const GAME_WIDTH = 800;
 const GAME_HEIGHT = 500;
-const GRID_SIZE = 60;
+const GRID_SIZE = 70;
 const COLS = 4;
 const ROWS = 4;
+const TILE_SIZE = 60;
 
-// Tile positions that make up the circuit
-const REQUIRED_TILES = [
-  { row: 0, col: 1 }, // Start (battery to right)
-  { row: 0, col: 2 },
-  { row: 0, col: 3 }, // Corner
-  { row: 1, col: 3 }, // Down
-  { row: 2, col: 3 }, // Down
-  { row: 2, col: 0 }, // Corner to left
-  { row: 2, col: 1 }, // Left
-  { row: 2, col: 2 }, // Corner back up
-  { row: 1, col: 2 }, // Up
-  { row: 1, col: 1 }, // Corner back to start
+// Correct circuit path (L-shaped)
+const CORRECT_CIRCUIT = [
+  { row: 0, col: 1, type: "straight" as const, rotation: 0 },
+  { row: 0, col: 2, type: "straight" as const, rotation: 0 },
+  { row: 0, col: 3, type: "corner" as const, rotation: 90 },
+  { row: 1, col: 3, type: "straight" as const, rotation: 90 },
+  { row: 2, col: 3, type: "corner" as const, rotation: 180 },
+  { row: 2, col: 2, type: "straight" as const, rotation: 0 },
+  { row: 2, col: 1, type: "straight" as const, rotation: 0 },
+  { row: 2, col: 0, type: "corner" as const, rotation: 270 },
+  { row: 1, col: 0, type: "straight" as const, rotation: 90 },
 ];
 
 export default function VillageLightUp() {
@@ -43,71 +42,64 @@ export default function VillageLightUp() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showCompletion, setShowCompletion] = useState(false);
   const [tiles, setTiles] = useState<WireTile[]>(
-    Array.from({ length: COLS * ROWS }, (_, i) => ({
-      id: i,
-      x: (i % COLS) * GRID_SIZE + 100,
-      y: Math.floor(i / COLS) * GRID_SIZE + 100,
-      rotation: Math.random() * 360,
-      type: Math.random() > 0.5 ? "straight" : "corner",
-      connected: false,
-    }))
+    Array.from({ length: COLS * ROWS }, (_, i) => {
+      const row = Math.floor(i / COLS);
+      const col = i % COLS;
+      const correct = CORRECT_CIRCUIT.find((c) => c.row === row && c.col === col);
+
+      if (correct) {
+        return {
+          id: i,
+          row,
+          col,
+          rotation: (Math.random() > 0.5 ? correct.rotation + 90 : correct.rotation + 270) % 360,
+          type: correct.type,
+        };
+      }
+
+      return {
+        id: i,
+        row,
+        col,
+        rotation: Math.random() * 360,
+        type: Math.random() > 0.5 ? "straight" : "corner",
+      };
+    })
   );
-  const [attempts, setAttempts] = useState(0);
   const [selectedTile, setSelectedTile] = useState<number | null>(null);
+  const [attempts, setAttempts] = useState(0);
+  const [circuitComplete, setCircuitComplete] = useState(false);
+  const [hints, setHints] = useState(0);
 
   const rotateTile = (id: number) => {
     setTiles((prev) =>
       prev.map((tile) =>
         tile.id === id
-          ? {
-              ...tile,
-              rotation: (tile.rotation + 90) % 360,
-            }
+          ? { ...tile, rotation: (tile.rotation + 90) % 360 }
           : tile
       )
     );
-    setAttempts((prev) => prev + 1);
     setSelectedTile(id);
+    setAttempts((prev) => prev + 1);
   };
 
-  // Check if circuit is complete
+  const checkCircuit = () => {
+    return CORRECT_CIRCUIT.every((correct) => {
+      const tile = tiles.find((t) => t.row === correct.row && t.col === correct.col);
+      return tile && tile.rotation === correct.rotation && tile.type === correct.type;
+    });
+  };
+
   useEffect(() => {
-    const isComplete = checkCircuit();
-    if (isComplete) {
-      setShowCompletion(true);
+    if (checkCircuit()) {
+      setCircuitComplete(true);
+    } else {
+      setCircuitComplete(false);
     }
   }, [tiles]);
 
-  const checkCircuit = () => {
-    // Very simplified check - in a real game, you'd do proper path tracing
-    const totalCorrect = tiles.filter((tile) => {
-      const correctRotation = getCorrectRotation(tile.id);
-      return correctRotation !== null && tile.rotation === correctRotation;
-    }).length;
-
-    return totalCorrect >= 8; // At least 8/10 tiles correct
-  };
-
-  const getCorrectRotation = (id: number) => {
-    const row = Math.floor(id / COLS);
-    const col = id % COLS;
-
-    // This maps the correct orientations for each tile
-    const correctMap: Record<string, number> = {
-      "0,1": 0, // horizontal
-      "0,2": 0, // horizontal
-      "0,3": 90, // corner down
-      "1,3": 0, // vertical
-      "2,3": 180, // corner left
-      "2,2": 0, // horizontal
-      "2,1": 0, // horizontal
-      "2,0": 90, // corner up
-      "1,0": 0, // vertical
-      "1,1": 0, // corner right
-    };
-
-    return correctMap[`${row},${col}`] ?? null;
-  };
+  const getTileX = (col: number) => 150 + col * GRID_SIZE + GRID_SIZE / 2;
+  const getTileY = (row: number) => 100 + row * GRID_SIZE + GRID_SIZE / 2;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -116,78 +108,78 @@ export default function VillageLightUp() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Background
-    ctx.fillStyle = "#1a1a2e";
+    // Night sky background
+    ctx.fillStyle = "#0a0e27";
     ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
     // Stars
     ctx.fillStyle = "#FFD700";
-    for (let i = 0; i < 30; i++) {
-      const x = (i * 37) % GAME_WIDTH;
-      const y = (i * 23) % 80;
+    for (let i = 0; i < 40; i++) {
+      const x = (i * 59) % GAME_WIDTH;
+      const y = (i * 37) % 80;
       ctx.beginPath();
-      ctx.arc(x, y, 1, 0, Math.PI * 2);
+      ctx.arc(x, y, 1.5, 0, Math.PI * 2);
       ctx.fill();
     }
 
     // Title
     ctx.fillStyle = "#FFF";
-    ctx.font = "bold 24px Arial";
+    ctx.font = "bold 20px Arial";
     ctx.textAlign = "center";
-    ctx.fillText("Complete the Circuit to Light Up the Village", GAME_WIDTH / 2, 40);
+    ctx.fillText("Connect the circuit to light up the village", GAME_WIDTH / 2, 30);
 
-    // Grid background
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
-    ctx.lineWidth = 1;
-    for (let i = 0; i < COLS; i++) {
-      for (let j = 0; j < ROWS; j++) {
-        const x = 100 + i * GRID_SIZE;
-        const y = 100 + j * GRID_SIZE;
-        ctx.strokeRect(x, y, GRID_SIZE, GRID_SIZE);
-      }
-    }
+    // ===== BATTERY (START POINT) =====
+    const batteryX = 80;
+    const batteryY = 100 + GRID_SIZE / 2;
 
-    // Draw battery (start)
     ctx.fillStyle = "#FF0000";
-    ctx.fillRect(20, 100, 30, GRID_SIZE);
+    ctx.fillRect(batteryX - 15, batteryY - 25, 30, 50);
     ctx.fillStyle = "#FFF";
-    ctx.font = "bold 12px Arial";
+    ctx.font = "bold 16px Arial";
     ctx.textAlign = "center";
-    ctx.fillText("+", 35, 130);
-
-    // Draw bulb (end)
-    ctx.fillStyle = "#FFD700";
-    ctx.beginPath();
-    ctx.arc(GAME_WIDTH - 40, 100 + GRID_SIZE / 2, 15, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = "#FFF";
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    ctx.fillText("+", batteryX, batteryY + 5);
 
     ctx.fillStyle = "#FFF";
     ctx.font = "bold 10px Arial";
     ctx.textAlign = "center";
-    ctx.fillText("💡", GAME_WIDTH - 40, 108);
+    ctx.fillText("BATTERY", batteryX, batteryY + 40);
 
-    // Draw tiles
+    // ===== GRID BACKGROUND =====
+    ctx.strokeStyle = "rgba(100, 150, 255, 0.15)";
+    ctx.lineWidth = 1;
+    for (let row = 0; row < ROWS; row++) {
+      for (let col = 0; col < COLS; col++) {
+        const x = getTileX(col);
+        const y = getTileY(row);
+        ctx.strokeRect(x - TILE_SIZE / 2, y - TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
+      }
+    }
+
+    // ===== DRAW TILES =====
     tiles.forEach((tile) => {
+      const x = getTileX(tile.col);
+      const y = getTileY(tile.row);
       const isSelected = selectedTile === tile.id;
+      const isCorrect =
+        CORRECT_CIRCUIT.some(
+          (c) => c.row === tile.row && c.col === tile.col && c.rotation === tile.rotation
+        );
 
       // Tile background
-      ctx.fillStyle = isSelected ? "#4a90e2" : "#2d3561";
-      ctx.fillRect(tile.x, tile.y, GRID_SIZE, GRID_SIZE);
+      ctx.fillStyle = isSelected ? "#4a90e2" : isCorrect ? "#22c55e" : "#1a2a4a";
+      ctx.fillRect(x - TILE_SIZE / 2, y - TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
 
       // Tile border
-      ctx.strokeStyle = isSelected ? "#FFF" : "rgba(255, 255, 255, 0.3)";
-      ctx.lineWidth = isSelected ? 3 : 1;
-      ctx.strokeRect(tile.x, tile.y, GRID_SIZE, GRID_SIZE);
+      ctx.strokeStyle = isSelected ? "#FFF" : isCorrect ? "#22c55e" : "rgba(100, 150, 255, 0.3)";
+      ctx.lineWidth = isSelected ? 3 : isCorrect ? 2 : 1;
+      ctx.strokeRect(x - TILE_SIZE / 2, y - TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
 
       // Draw wire pattern
       ctx.save();
-      ctx.translate(tile.x + GRID_SIZE / 2, tile.y + GRID_SIZE / 2);
+      ctx.translate(x, y);
       ctx.rotate((tile.rotation * Math.PI) / 180);
 
-      ctx.strokeStyle = "#FFD700";
+      ctx.strokeStyle = isCorrect ? "#22c55e" : "#FFD700";
       ctx.lineWidth = 4;
 
       if (tile.type === "straight") {
@@ -197,83 +189,137 @@ export default function VillageLightUp() {
         ctx.lineTo(20, 0);
         ctx.stroke();
 
-        // Connection dots
-        ctx.fillStyle = "#FFD700";
+        // Connection points
+        ctx.fillStyle = isCorrect ? "#22c55e" : "#FFD700";
         ctx.beginPath();
-        ctx.arc(-20, 0, 3, 0, Math.PI * 2);
+        ctx.arc(-20, 0, 4, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(20, 0, 3, 0, Math.PI * 2);
+        ctx.arc(20, 0, 4, 0, Math.PI * 2);
         ctx.fill();
       } else {
-        // Corner line
+        // Corner line (L-shaped)
         ctx.beginPath();
         ctx.moveTo(-20, 0);
         ctx.lineTo(0, 0);
         ctx.lineTo(0, -20);
         ctx.stroke();
 
-        // Connection dots
-        ctx.fillStyle = "#FFD700";
+        // Connection points
+        ctx.fillStyle = isCorrect ? "#22c55e" : "#FFD700";
         ctx.beginPath();
-        ctx.arc(-20, 0, 3, 0, Math.PI * 2);
+        ctx.arc(-20, 0, 4, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(0, -20, 3, 0, Math.PI * 2);
+        ctx.arc(0, -20, 4, 0, Math.PI * 2);
         ctx.fill();
       }
 
       ctx.restore();
-
-      // Glow if correct rotation
-      const correctRotation = getCorrectRotation(tile.id);
-      if (correctRotation !== null && tile.rotation === correctRotation) {
-        ctx.strokeStyle = "#00FF00";
-        ctx.lineWidth = 2;
-        ctx.globalAlpha = 0.5;
-        ctx.strokeRect(tile.x - 2, tile.y - 2, GRID_SIZE + 4, GRID_SIZE + 4);
-        ctx.globalAlpha = 1;
-      }
     });
 
-    // Draw current flow if circuit is complete
-    if (checkCircuit()) {
-      ctx.strokeStyle = "#FFD700";
-      ctx.lineWidth = 2;
-      ctx.globalAlpha = 0.6;
+    // ===== LIGHT BULB (END POINT) =====
+    const bulbX = GAME_WIDTH - 80;
+    const bulbY = 100 + GRID_SIZE / 2;
 
-      // Flow animation
-      const offset = (Date.now() / 10) % 40;
-      ctx.setLineDash([10, 5]);
-      ctx.lineDashOffset = -offset;
-
-      // Simple path from battery through circuit
+    if (circuitComplete) {
+      // Glowing bulb
+      ctx.fillStyle = "rgba(255, 215, 0, 0.4)";
       ctx.beginPath();
-      ctx.moveTo(50, 130);
-      ctx.lineTo(100, 130);
-      for (const pos of REQUIRED_TILES) {
-        ctx.lineTo(100 + pos.col * GRID_SIZE + GRID_SIZE / 2, 100 + pos.row * GRID_SIZE + GRID_SIZE / 2);
-      }
-      ctx.lineTo(GAME_WIDTH - 40, 130);
+      ctx.arc(bulbX, bulbY, 35, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "rgba(255, 215, 0, 0.6)";
+      ctx.beginPath();
+      ctx.arc(bulbX, bulbY, 25, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.fillStyle = circuitComplete ? "#FFD700" : "#444";
+    ctx.beginPath();
+    ctx.arc(bulbX, bulbY, 15, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = "#888";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = "#FFF";
+    ctx.font = "bold 10px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("💡", bulbX - 1, bulbY + 3);
+
+    ctx.fillStyle = "#FFF";
+    ctx.font = "bold 10px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("LIGHT", bulbX, bulbY + 40);
+
+    // ===== ANIMATED ELECTRICITY FLOW =====
+    if (circuitComplete) {
+      const pathOffset = (Date.now() / 30) % 100;
+
+      ctx.strokeStyle = "#FFD700";
+      ctx.lineWidth = 3;
+      ctx.setLineDash([5, 5]);
+      ctx.lineDashOffset = -pathOffset;
+      ctx.globalAlpha = 0.8;
+
+      // Draw circuit path
+      ctx.beginPath();
+      ctx.moveTo(batteryX + 15, batteryY);
+
+      // Follow the correct circuit
+      CORRECT_CIRCUIT.forEach((pos, index) => {
+        const x = getTileX(pos.col);
+        const y = getTileY(pos.row);
+        if (index === 0) {
+          ctx.lineTo(x - TILE_SIZE / 2, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      });
+
+      ctx.lineTo(bulbX - 15, bulbY);
       ctx.stroke();
       ctx.setLineDash([]);
       ctx.globalAlpha = 1;
 
-      // Victory message
-      ctx.fillStyle = "rgba(0, 255, 0, 0.8)";
-      ctx.fillRect(GAME_WIDTH / 2 - 150, GAME_HEIGHT - 100, 300, 80);
-      ctx.fillStyle = "#000";
-      ctx.font = "bold 24px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText("🎉 CIRCUIT COMPLETE!", GAME_WIDTH / 2, GAME_HEIGHT - 50);
+      // Sparkling effect on the path
+      for (let i = 0; i < 5; i++) {
+        const t = ((Date.now() / 60 + i * 0.2) % 1);
+        ctx.fillStyle = `rgba(255, 215, 0, ${0.5 * (1 - Math.abs(t - 0.5) * 2)})`;
+        const pathIdx = Math.floor(t * CORRECT_CIRCUIT.length);
+        if (pathIdx < CORRECT_CIRCUIT.length) {
+          const pos = CORRECT_CIRCUIT[pathIdx];
+          const x = getTileX(pos.col);
+          const y = getTileY(pos.row);
+          ctx.beginPath();
+          ctx.arc(x, y, 6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
     }
 
-    // Attempts counter
-    ctx.fillStyle = "#FFF";
-    ctx.font = "14px Arial";
-    ctx.textAlign = "left";
-    ctx.fillText(`Rotations: ${attempts}`, 10, GAME_HEIGHT - 20);
-  }, [tiles, selectedTile, attempts]);
+    // ===== STATUS MESSAGE =====
+    ctx.fillStyle = circuitComplete ? "#22c55e" : "#FF6B6B";
+    ctx.font = "bold 18px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(
+      circuitComplete ? "✓ CIRCUIT COMPLETE!" : "Circuit Broken",
+      GAME_WIDTH / 2,
+      GAME_HEIGHT - 30
+    );
+
+    if (circuitComplete) {
+      ctx.fillStyle = "#FFD700";
+      ctx.font = "14px Arial";
+      ctx.fillText("Electricity is flowing!", GAME_WIDTH / 2, GAME_HEIGHT - 5);
+    } else if (attempts > 8 && hints === 0) {
+      ctx.fillStyle = "#FFA500";
+      ctx.font = "12px Arial";
+      ctx.fillText("Tip: Look for the green-glowing tiles!", GAME_WIDTH / 2, GAME_HEIGHT - 5);
+    }
+  }, [tiles, selectedTile, circuitComplete, attempts, hints]);
 
   const handleStart = () => {
     setShowTutorial(false);
@@ -289,14 +335,29 @@ export default function VillageLightUp() {
 
   const handleReset = () => {
     setTiles(
-      Array.from({ length: COLS * ROWS }, (_, i) => ({
-        id: i,
-        x: (i % COLS) * GRID_SIZE + 100,
-        y: Math.floor(i / COLS) * GRID_SIZE + 100,
-        rotation: Math.random() * 360,
-        type: Math.random() > 0.5 ? "straight" : "corner",
-        connected: false,
-      }))
+      Array.from({ length: COLS * ROWS }, (_, i) => {
+        const row = Math.floor(i / COLS);
+        const col = i % COLS;
+        const correct = CORRECT_CIRCUIT.find((c) => c.row === row && c.col === col);
+
+        if (correct) {
+          return {
+            id: i,
+            row,
+            col,
+            rotation: (Math.random() > 0.5 ? correct.rotation + 90 : correct.rotation + 270) % 360,
+            type: correct.type,
+          };
+        }
+
+        return {
+          id: i,
+          row,
+          col,
+          rotation: Math.random() * 360,
+          type: Math.random() > 0.5 ? "straight" : "corner",
+        };
+      })
     );
     setAttempts(0);
     setShowCompletion(false);
@@ -306,7 +367,7 @@ export default function VillageLightUp() {
     <div
       className={cn(
         "flex flex-col items-center justify-center transition-all duration-300",
-        isFullscreen ? "fixed inset-0 z-50 bg-black p-0" : "w-full bg-gray-900 p-4"
+        isFullscreen ? "fixed inset-0 z-50 bg-black p-0 overflow-hidden" : "w-full bg-gray-900 p-4"
       )}
     >
       {/* Fullscreen button */}
@@ -329,7 +390,7 @@ export default function VillageLightUp() {
           onClick={() => setIsFullscreen(false)}
           size="sm"
           variant="outline"
-          className="absolute top-4 right-4 z-10 gap-2 bg-white"
+          className="absolute top-4 right-4 z-10 gap-2 bg-white hover:bg-gray-100"
         >
           <Minimize2 className="w-4 h-4" />
           Exit
@@ -338,7 +399,7 @@ export default function VillageLightUp() {
 
       {/* Canvas */}
       <div className={cn(
-        "rounded-lg border-2 border-yellow-500 shadow-lg bg-black overflow-hidden",
+        "rounded-lg border-2 border-yellow-500 shadow-lg bg-gray-950 overflow-hidden",
         isFullscreen ? "w-screen h-screen" : "w-full max-w-4xl"
       )}>
         <canvas
@@ -355,12 +416,10 @@ export default function VillageLightUp() {
 
             // Find clicked tile
             tiles.forEach((tile) => {
-              if (
-                x >= tile.x &&
-                x <= tile.x + GRID_SIZE &&
-                y >= tile.y &&
-                y <= tile.y + GRID_SIZE
-              ) {
+              const tileX = getTileX(tile.col);
+              const tileY = getTileY(tile.row);
+              const dist = Math.sqrt((x - tileX) ** 2 + (y - tileY) ** 2);
+              if (dist < TILE_SIZE / 2) {
                 rotateTile(tile.id);
               }
             });
@@ -370,31 +429,37 @@ export default function VillageLightUp() {
 
       {/* Controls */}
       {!isFullscreen && (
-        <div className="mt-6 w-full max-w-4xl bg-gray-800 p-6 rounded-lg border border-yellow-500">
+        <div className="mt-6 w-full max-w-4xl bg-gray-800 p-6 rounded-lg border border-yellow-500 shadow-md">
           <div className="space-y-6">
             <div className="text-white text-center">
-              <p className="text-sm mb-2">
-                Click on tiles to rotate them. Connect all tiles to complete the circuit!
+              <p className="text-sm mb-2 font-semibold">
+                Click tiles to rotate them. Complete the circuit to light up the bulb!
               </p>
               <p className="text-xs text-gray-400">
-                Green glow = correct rotation
+                Green glow = correct rotation | Yellow electricity = circuit active
               </p>
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 gap-4 p-4 bg-gray-700 rounded-lg text-white text-center">
+            <div className="grid grid-cols-3 gap-3 p-4 bg-gray-700 rounded-lg text-white text-center">
               <div>
-                <div className="text-xs text-gray-400">Total Rotations</div>
+                <div className="text-xs text-gray-400">Rotations</div>
                 <div className="text-2xl font-bold text-yellow-400">{attempts}</div>
               </div>
               <div>
                 <div className="text-xs text-gray-400">Correct Tiles</div>
                 <div className="text-2xl font-bold text-green-400">
                   {tiles.filter((t) => {
-                    const correct = getCorrectRotation(t.id);
-                    return correct !== null && t.rotation === correct;
+                    const correct = CORRECT_CIRCUIT.find((c) => c.row === t.row && c.col === t.col);
+                    return correct && t.rotation === correct.rotation;
                   }).length}
                   /{COLS * ROWS}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-400">Status</div>
+                <div className="text-2xl font-bold" style={{ color: circuitComplete ? "#22c55e" : "#FF6B6B" }}>
+                  {circuitComplete ? "✓" : "✗"}
                 </div>
               </div>
             </div>
@@ -404,18 +469,28 @@ export default function VillageLightUp() {
               <Button
                 onClick={handleReset}
                 variant="outline"
-                className="text-yellow-500 border-yellow-500 hover:bg-yellow-500 hover:text-black font-bold"
+                className="text-yellow-400 border-yellow-500 hover:bg-yellow-500 hover:text-black font-bold"
               >
                 🔄 Reset
               </Button>
               <Button
                 onClick={() => setShowCompletion(true)}
-                disabled={!checkCircuit()}
+                disabled={!circuitComplete}
                 className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold disabled:opacity-50"
               >
                 ✅ Check Circuit
               </Button>
             </div>
+
+            {attempts > 8 && hints === 0 && (
+              <Button
+                onClick={() => setHints(1)}
+                variant="outline"
+                className="w-full text-orange-400 border-orange-400 hover:bg-orange-400 hover:text-black font-bold"
+              >
+                💡 Show Hint
+              </Button>
+            )}
           </div>
         </div>
       )}
@@ -427,19 +502,19 @@ export default function VillageLightUp() {
             <div>
               <h3 className="font-bold text-gray-800 mb-2">📘 Concept</h3>
               <p className="text-sm text-gray-700">
-                Electricity needs a complete, unbroken loop to flow. If the circuit is broken anywhere, electricity won't reach the bulb!
+                Electricity needs a complete, unbroken loop to flow. If the circuit is broken anywhere, electricity stops!
               </p>
             </div>
             <div>
               <h3 className="font-bold text-gray-800 mb-2">🕹 How to Play</h3>
               <p className="text-sm text-gray-700">
-                Click on tiles to rotate them. Connect all the wires to create a complete circuit from the battery to the light bulb.
+                Click on wire tiles to rotate them. Connect all tiles to create an unbroken path from the battery to the bulb.
               </p>
             </div>
             <div>
               <h3 className="font-bold text-gray-800 mb-2">🧠 What You Learn</h3>
               <p className="text-sm text-gray-700">
-                Circuits must form a closed loop. Broken paths = no electricity. Complete loop = light!
+                Circuits must form a closed loop. Broken paths = no electricity. Complete loop = electricity flows and lights work!
               </p>
             </div>
           </div>
@@ -457,21 +532,21 @@ export default function VillageLightUp() {
         conceptName="Village Light-Up"
         whatYouWillUnderstand="Learn how electricity flows in closed circuits. A broken path = no light!"
         gameSteps={[
-          "Observe the battery (red) and light bulb (yellow)",
+          "Look at the battery (red box) and light bulb",
           "Click on wire tiles to rotate them",
-          "Connect all wires to form a complete loop",
-          "Complete the circuit to light up the village",
+          "Create a complete path from battery to bulb",
+          "When all tiles are correct, electricity flows!",
         ]}
-        successMeaning="When all wires are correctly connected, electricity flows and the bulbs light up!"
+        successMeaning="When all wires connect perfectly, you'll see yellow electricity flowing and the bulb will light up!"
         icon="💡"
       />
 
       <GameCompletionPopup
-        isOpen={showCompletion && checkCircuit()}
+        isOpen={showCompletion && circuitComplete}
         onPlayAgain={handleReset}
         onExitFullscreen={handleExitFullscreen}
         onBackToGames={handleGoBack}
-        learningOutcome="You mastered circuits! You understand that electricity needs a complete, unbroken loop to flow and power devices!"
+        learningOutcome="You mastered circuits! Electricity needs a complete, unbroken loop to flow. Broken paths = no power. Closed loops = power!"
         isFullscreen={isFullscreen}
       />
 
