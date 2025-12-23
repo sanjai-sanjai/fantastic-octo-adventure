@@ -329,7 +329,15 @@ export default function FinanceSubjectPage() {
   const [playingGame, setPlayingGame] = useState<GameCard | null>(null);
   const [activeModule, setActiveModule] = useState<ActiveLearningModule | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<PassiveLearningChapter | null>(null);
+  const [completedChapters, setCompletedChapters] = useState<Set<number>>(new Set());
   const totalProgress = 65;
+
+  // Scroll to top when chapter is selected
+  useEffect(() => {
+    if (selectedChapter) {
+      window.scrollTo(0, 0);
+    }
+  }, [selectedChapter]);
 
   const handlePlayGame = (game: GameCard) => {
     setSelectedGame(game);
