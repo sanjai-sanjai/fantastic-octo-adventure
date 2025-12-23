@@ -83,7 +83,7 @@ export default function VillageSkillsPage() {
             </div>
           ))}
         </div>
-      </div>
-    </SubjectLayout>
-  );
-}
+        </div>
+      </SubjectLayout>
+    );
+  }
