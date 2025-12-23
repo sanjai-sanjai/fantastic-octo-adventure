@@ -159,9 +159,9 @@ export default function LearningModeSelectionPage() {
             <Sparkles className="h-4 w-4 text-primary" />
             <span className="text-sm font-medium text-primary">Progress your Learning & Earning</span>
           </div>
-          <h3 className="font-heading text-xl font-bold text-foreground">
-            <h1>Learn to manage money early — it's the smartest power you can have</h1>
-          </h3>
+          <h1 className="font-heading text-xl font-bold text-foreground">
+            Learn to manage money early — it's the smartest power you can have
+          </h1>
         </div>
 
         {/* Learning Mode Cards */}
