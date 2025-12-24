@@ -424,19 +424,19 @@ export default function TasksPage() {
               <div className="glass-card border border-border rounded-lg p-8 text-center">
                 <Award className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
                 <p className="font-medium text-foreground mb-1">
-                  {selectedStatusFilter === "completed" && "No completed tasks yet"}
-                  {selectedStatusFilter === "active" && "No active tasks"}
-                  {selectedStatusFilter === "available" && "No available tasks"}
-                  {selectedStatusFilter === "all" && "No tasks available"}
+                  {selectedStatusFilter === "completed" && t('tasks.emptyCompleted')}
+                  {selectedStatusFilter === "active" && t('tasks.emptyActive')}
+                  {selectedStatusFilter === "available" && t('tasks.emptyAvailable')}
+                  {selectedStatusFilter === "all" && t('tasks.emptyAll')}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {selectedStatusFilter !== "all" && selectedCategory !== "all"
-                    ? "Try selecting a different category"
+                    ? t('tasks.tryDifferentCategory')
                     : selectedStatusFilter === "completed"
-                    ? "Complete tasks to earn rewards!"
+                    ? t('tasks.earnRewards')
                     : selectedStatusFilter === "available"
-                    ? "Check back soon for more tasks"
-                    : "Start an available task to get going!"}
+                    ? t('tasks.checkSoon')
+                    : t('tasks.startTask')}
                 </p>
               </div>
             ) : (
