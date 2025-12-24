@@ -37,7 +37,7 @@
     "settings": "ترتیبات"
   },
   "dashboard": {
-    "greeting": "ہیلو {name}! 👋",
+    "greeting": "ہیلو",
     "readyForAdventure": "آج کے مہم کے لیے تیار!",
     "todayHours": "آج",
     "dayStreak": "مسلسل دن",
