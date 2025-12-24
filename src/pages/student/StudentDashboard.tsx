@@ -158,11 +158,11 @@ export default function StudentDashboard() {
             {t('common.subjects')}
           </h3>
           <div className="grid grid-cols-2 gap-3">
-            {subjects.map((subject) => (
+            {subjectConfig.map((subject) => (
               <GameCard
-                key={subject.title}
+                key={subject.titleKey}
                 icon={subject.icon}
-                title={subject.title}
+                title={t(`subjects.${subject.titleKey}`)}
                 progress={subject.progress}
                 variant="default"
                 colorScheme={subject.color}
