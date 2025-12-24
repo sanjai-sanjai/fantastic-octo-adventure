@@ -273,10 +273,10 @@ export function DataSyncStatus({ className }: DataSyncStatusProps) {
           'inline-flex items-center gap-2',
           'px-3 sm:px-4',
           'h-10 rounded-lg',
-          'border border-transparent transition-all duration-200',
+          'border transition-all duration-200',
           'text-xs sm:text-sm font-medium',
-          'disabled:opacity-70 disabled:cursor-not-allowed',
-          'hover:opacity-80 active:scale-95 transition-transform',
+          'disabled:opacity-60 disabled:cursor-not-allowed',
+          'active:scale-95',
           getButtonClasses(),
           className
         )}
