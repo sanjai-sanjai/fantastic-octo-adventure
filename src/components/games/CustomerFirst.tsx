@@ -470,7 +470,18 @@ export function CustomerFirst({ onComplete, onBack }: { onComplete: (score: numb
     return (
       <div className="fixed inset-0 bg-gradient-to-b from-background to-background/80 flex flex-col p-4 overflow-auto">
         <div className="max-w-2xl mx-auto w-full space-y-6 py-6">
-          <h2 className="font-heading text-2xl font-bold text-foreground">🔧 {improvementTitle}</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="font-heading text-2xl font-bold text-foreground">🔧 {improvementTitle}</h2>
+            {onBack && (
+              <button
+                onClick={handleBackPress}
+                className="p-2 hover:bg-card rounded-lg transition-all text-muted-foreground hover:text-foreground"
+                title="Back to Entrepreneurship"
+              >
+                <ArrowLeft size={20} />
+              </button>
+            )}
+          </div>
 
           <div className="glass-card rounded-xl border border-primary/50 p-6 bg-primary/10 space-y-4">
             <div className="space-y-4">
