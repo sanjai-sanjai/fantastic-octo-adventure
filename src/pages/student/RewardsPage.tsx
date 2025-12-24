@@ -336,23 +336,23 @@ export default function RewardsPage() {
 
               <div className="flex items-center justify-center gap-2 mb-3">
                 <Sparkles className="h-6 w-6 text-accent animate-pulse" />
-                <h3 className="font-display text-3xl text-foreground">Awesome!</h3>
+                <h3 className="font-display text-3xl text-foreground">{t('rewards.awesome')}</h3>
                 <Sparkles className="h-6 w-6 text-accent animate-pulse" />
               </div>
 
-              <p className="text-lg text-muted-foreground mb-2">You earned this by learning!</p>
+              <p className="text-lg text-muted-foreground mb-2">{t('rewards.earnedByLearning')}</p>
 
               <p className="text-base text-accent font-bold mb-4">{redeemedItem}</p>
 
               <div className="bg-secondary/10 rounded-xl p-3 mb-6 flex items-center justify-center gap-2">
                 <EduCoin size="sm" />
                 <p className="text-sm text-muted-foreground">
-                  <span className="font-bold text-secondary">{redeemedPrice}</span> EduCoins Spent
+                  <span className="font-bold text-secondary">{redeemedPrice}</span> {t('rewards.eduCoins')} {t('rewards.spent')}
                 </p>
               </div>
 
               <p className="text-sm text-muted-foreground/70 mb-6">
-                Your reward will be delivered soon 🎁
+                {t('rewards.awesome')} 🎁
               </p>
 
               <Button
@@ -360,7 +360,7 @@ export default function RewardsPage() {
                 className="w-full bg-gradient-to-r from-accent to-accent/80 text-accent-foreground hover:from-accent/90 hover:to-accent/70"
               >
                 <Check className="h-4 w-4 mr-2" />
-                Continue Shopping
+                {t('rewards.continueShopping')}
               </Button>
             </div>
           </div>
