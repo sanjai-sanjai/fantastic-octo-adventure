@@ -95,7 +95,7 @@ function InputProcessOutput() {
         </div>
 
         {/* System Display */}
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-lg border-2 border-dashed border-slate-300">
+        <div className="glass-card p-4 rounded-lg border-2 border-dashed border-border/50 bg-card/50">
           {blocks.length === 0 ? (
             <div className="text-center text-muted-foreground text-sm">
               Drag blocks here to build your system
@@ -132,7 +132,7 @@ function InputProcessOutput() {
           </div>
         )}
 
-        <div className="text-xs text-center text-muted-foreground bg-white dark:bg-slate-800 p-2 rounded">
+        <div className="text-xs text-center text-muted-foreground glass-card bg-card/50 p-2 rounded border border-border/30">
           Systems follow Input → Process → Output order
         </div>
       </div>
@@ -192,7 +192,7 @@ function InsideAnApp() {
               className={`p-4 rounded-lg transition-all ${
                 clicked === key
                   ? "bg-primary text-primary-foreground"
-                  : "bg-white dark:bg-slate-800 border border-primary/30 hover:border-primary/60"
+                  : "glass-card bg-card/50 border border-primary/30 hover:border-primary/60"
               }`}
             >
               <div className="text-3xl mb-2">{flow.emoji}</div>
@@ -209,7 +209,7 @@ function InsideAnApp() {
               {flows[clicked as keyof typeof flows].steps.map((step, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center gap-3 p-2 bg-white dark:bg-slate-800 rounded-lg"
+                  className="flex items-center gap-3 p-2 glass-card bg-card/50 rounded-lg border border-border/30"
                 >
                   <div className="text-sm font-bold text-primary min-w-6">{idx + 1}</div>
                   <div className="text-sm text-foreground">{step}</div>
@@ -219,7 +219,7 @@ function InsideAnApp() {
           </div>
         )}
 
-        <div className="text-xs text-center text-muted-foreground bg-white dark:bg-slate-800 p-2 rounded">
+        <div className="text-xs text-center text-muted-foreground glass-card bg-card/50 p-2 rounded border border-border/30">
           Tap an action to see what happens inside the app
         </div>
       </div>
@@ -277,7 +277,7 @@ function TechnologyAroundUs() {
               className={`p-3 rounded-lg transition-all ${
                 selected === idx
                   ? "bg-primary text-primary-foreground"
-                  : "bg-white dark:bg-slate-800 border border-primary/30 hover:border-primary/60"
+                  : "glass-card bg-card/50 border border-primary/30 hover:border-primary/60"
               }`}
             >
               <div className="text-3xl mb-2">{device.emoji}</div>
@@ -306,7 +306,7 @@ function TechnologyAroundUs() {
           </div>
         )}
 
-        <div className="text-xs text-center text-muted-foreground bg-white dark:bg-slate-800 p-2 rounded">
+        <div className="text-xs text-center text-muted-foreground glass-card bg-card/50 p-2 rounded border border-border/30">
           All technology has Input → Process → Output!
         </div>
       </div>

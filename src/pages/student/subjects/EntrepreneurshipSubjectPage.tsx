@@ -40,7 +40,7 @@ const levels: GameLevel[] = [
     coins: 35,
     status: "completed",
     stars: 2,
-    route: "/student/entrepreneurship/level/1"
+    route: "/learn/entrepreneurship/active-learning"
   },
   {
     id: "2",
@@ -51,7 +51,7 @@ const levels: GameLevel[] = [
     xp: 150,
     coins: 45,
     status: "available",
-    route: "/student/entrepreneurship/level/2"
+    route: "/learn/entrepreneurship/active-learning"
   },
   {
     id: "3",
@@ -62,7 +62,7 @@ const levels: GameLevel[] = [
     xp: 200,
     coins: 75,
     status: "locked",
-    route: "/student/entrepreneurship/level/3"
+    route: "/learn/entrepreneurship/active-learning"
   }
 ];
 

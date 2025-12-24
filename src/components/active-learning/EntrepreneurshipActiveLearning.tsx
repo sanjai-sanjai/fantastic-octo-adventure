@@ -74,7 +74,7 @@ function ProblemSolutionMapper() {
                 className={`w-full text-left p-3 rounded-lg transition-all ${
                   selected === p.id - 1
                     ? "bg-primary/20 text-primary border border-primary/50"
-                    : "bg-white dark:bg-slate-800 border border-border hover:border-primary/50"
+                    : "glass-card bg-card/50 border border-border hover:border-primary/50"
                 }`}
               >
                 <div className="text-sm font-semibold">Problem {p.id}: {p.problem}</div>
@@ -228,7 +228,7 @@ function CostVsProfitSlider() {
         </div>
 
         {/* Summary */}
-        <div className="bg-white dark:bg-slate-800 p-3 rounded-lg space-y-1 text-sm">
+        <div className="glass-card bg-card/50 p-3 rounded-lg space-y-1 text-sm border border-border/30">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Profit per item:</span>
             <span className="font-bold text-primary">₹{profitPerItem}</span>
