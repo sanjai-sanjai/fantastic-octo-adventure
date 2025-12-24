@@ -61,9 +61,12 @@ export function AppLayout({
             </div>
 
             {/* Right side actions */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               {/* Language Switcher - Available for all roles */}
               <LanguageSwitcherButton />
+
+              {/* Data Sync Status - Available for all roles */}
+              <DataSyncStatus />
 
               {/* Wallet Balance for students */}
               {role === "student" && typeof displayCoins === "number" && (
