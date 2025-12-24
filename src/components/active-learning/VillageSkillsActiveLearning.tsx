@@ -95,8 +95,8 @@ function WaterUsagePlanner() {
         </div>
 
         {/* Water Visual */}
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-lg">
-          <div className="h-6 bg-slate-300 rounded-full overflow-hidden">
+        <div className="bg-slate-800/50 border border-slate-700/50 p-4 rounded-lg backdrop-blur-sm">
+          <div className="h-6 bg-slate-700/50 rounded-full overflow-hidden border border-slate-600/30">
             <div
               className={`h-full transition-all duration-300 ${
                 remaining < 0
@@ -113,7 +113,7 @@ function WaterUsagePlanner() {
           </div>
         </div>
 
-        <div className="text-xs text-center text-muted-foreground bg-white dark:bg-slate-800 p-2 rounded">
+        <div className="text-xs text-center text-muted-foreground bg-slate-800/50 border border-slate-700/50 p-2 rounded backdrop-blur-sm">
           Save water for farming — it feeds the village!
         </div>
       </div>
