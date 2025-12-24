@@ -103,6 +103,20 @@ export function useSoundEffects() {
     setTimeout(() => playTone(1318.51, 0.12, "square", volume), 80); // E6
   }, [playTone]);
 
+  const playSyncSuccess = useCallback((options?: SoundOptions) => {
+    const { volume = 0.15 } = options || {};
+    // Soft digital confirmation sound (Google Pay style)
+    // Short, clean, premium - 200-300ms duration
+    const notes = [
+      { freq: 659.25, duration: 0.1, delay: 0 },    // E5 - bright, clean start
+      { freq: 783.99, duration: 0.15, delay: 100 }, // G5 - deeper confirmation
+    ];
+
+    notes.forEach(({ freq, duration, delay }) => {
+      setTimeout(() => playTone(freq, duration, "sine", volume), delay);
+    });
+  }, [playTone]);
+
   return {
     playCorrect,
     playIncorrect,
@@ -110,6 +124,7 @@ export function useSoundEffects() {
     playClick,
     playAchievement,
     playCoins,
+    playSyncSuccess,
     playTone,
   };
 }
