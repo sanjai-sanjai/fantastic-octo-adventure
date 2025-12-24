@@ -122,7 +122,7 @@ export default function StudentDashboard() {
             <div className="flex items-center gap-3">
               <div className="flex-1">
                 <h2 className="font-heading text-xl font-bold text-foreground">
-                  {t('dashboard.greeting', { name: userName })}
+                  {t('dashboard.greeting')} {userName}! 👋
                 </h2>
                 <p className="mt-1 text-muted-foreground text-sm">{t('dashboard.readyForAdventure')}</p>
               </div>
