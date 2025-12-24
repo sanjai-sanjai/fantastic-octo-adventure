@@ -28,20 +28,21 @@ const subjects = [
 
 export default function SubjectsPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
-    <AppLayout 
-      role="student" 
+    <AppLayout
+      role="student"
       playCoins={1250}
-      title="Subjects"
+      title={t('common.subjects')}
     >
       <div className="px-4 py-6">
         {/* Header with mascot */}
         <div className="mb-6 slide-up flex items-center gap-4">
           <div className="flex-1">
-            <h2 className="font-heading text-2xl font-bold text-foreground">Choose a Subject</h2>
+            <h2 className="font-heading text-2xl font-bold text-foreground">{t('subjects.chooseSubject')}</h2>
             <p className="mt-1 text-muted-foreground text-sm">
-              Tap on a subject to start learning
+              {t('common.dashboard')}
             </p>
           </div>
           <img
@@ -53,14 +54,14 @@ export default function SubjectsPage() {
 
         <div className="grid grid-cols-2 gap-4">
           {subjects.map((subject, index) => (
-            <div 
-              key={subject.title}
+            <div
+              key={subject.titleKey}
               className="slide-up"
               style={{ animationDelay: `${index * 50}ms` }}
             >
               <GameCard
                 icon={subject.icon}
-                title={subject.title}
+                title={t(`subjects.${subject.titleKey}`)}
                 progress={subject.progress}
                 variant="default"
                 colorScheme={subject.color}
