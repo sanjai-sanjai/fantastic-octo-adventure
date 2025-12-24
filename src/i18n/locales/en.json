@@ -120,6 +120,17 @@
     "noTasksAvailable": "No tasks available yet",
     "completeTasksToEarn": "Complete tasks to earn rewards and level up! 🚀",
     "title": "Tasks",
+    "showing": "📋 Showing",
+    "viewAll": "View All",
+    "tryDifferentCategory": "Try selecting a different category",
+    "earnRewards": "Complete tasks to earn rewards!",
+    "checkSoon": "Check back soon for more tasks",
+    "startTask": "Start an available task to get going!",
+    "progress": "Progress",
+    "inProgress": "In progress...",
+    "verifiedByTeacher": "✅ Verified by Teacher",
+    "pendingVerification": "⏳ Pending Verification",
+    "rejectedRetry": "❌ Rejected - Please retry",
     "categories": {
       "village": "Village",
       "family": "Family",
@@ -140,6 +151,11 @@
       "startTask": "🚀 Start Task",
       "continueTask": "▶️ Continue Task",
       "submitProof": "Submit Proof"
+    },
+    "proof": {
+      "photo": "📸 Photo",
+      "text": "✍️ Write",
+      "auto": "✓ Auto"
     },
     "emptyCompleted": "No completed tasks yet",
     "emptyActive": "No active tasks",
